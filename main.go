@@ -34,9 +34,36 @@ func notFundHandler(w http.ResponseWriter, r *http.Request){
 }
 
 func articlesShowHandler(w http.ResponseWriter, r *http.Request)  {
+	// 获取URL 参数
 	vars := mux.Vars(r)
 	id := vars["id"]
-	fmt.Fprint(w, "文章ID: " + id)
+
+	// 读取对应文章
+	article := Article{}
+	query := "SELECT * FROM articles WHERE id = ?"
+	err := db.QueryRow(query, id).Scan(&article.ID, &article.Title, &article.Body)
+
+	if err != nil {
+		if err == sql.ErrNoRows {
+			// 3.1 未找到数据
+			w.WriteHeader(http.StatusNotFound)
+		} else {
+			// 数据错误
+			checkError(err)
+			w.WriteHeader(http.StatusInternalServerError)
+			fmt.Fprint(w, "500 服务器内部错误")
+		}
+	} else {
+		//
+		tmpl, err := template.ParseFiles("resources/views/articles/show.gohtml")
+		//fmt.Fprint(w, "读取成功，文章标题 -- " + article.Title)
+		checkError(err)
+
+		err = tmpl.Execute(w, article)
+		checkError(err)
+	}
+
+	//fmt.Fprint(w, "文章ID: " + id)
 }
 
 func articlesIndexHandler(w http.ResponseWriter, r *http.Request) {
@@ -69,6 +96,12 @@ type ArticlesFormData struct {
 	Title, Body string
 	URL 	*url.URL
 	Errors	map[string]string
+}
+
+// Article 对应一条文章记录
+type Article struct {
+	Title, Body string
+	ID 			int64
 }
 
 
