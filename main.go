@@ -69,7 +69,34 @@ func articlesShowHandler(w http.ResponseWriter, r *http.Request)  {
 }
 
 func articlesIndexHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprint(w, "访问文章列表")
+	// 执行查询语句，返回一个结果集
+	rows, err := db.Query("SELECT * FROM articles")
+	checkError(err)
+	defer rows.Close()
+
+	var articles []Article
+	// 循环读取结果
+	for rows.Next() {
+		var article Article
+		// 扫描每一行结果并赋值到一个article对象中
+		err := rows.Scan(&article.ID, &article.Title, &article.Body)
+
+		checkError(err)
+		// 将article 追加到 articles数组中
+		articles = append(articles, article)
+	}
+
+	// 检测遍历是否发生错误
+	err = rows.Err()
+	checkError(err)
+
+	// 加载模板
+	tmpl, err := template.ParseFiles("resources/views/articles/index.gohtml")
+	checkError(err)
+
+	// 渲染模板, 将所有文章数据传输进去
+	err = tmpl.Execute(w, articles)
+	checkError(err)
 }
 
 // 创建文章列表t
@@ -262,6 +289,15 @@ type Article struct {
 	ID 			int64
 }
 
+// Link 方法生成文章链接
+func (a Article) Link() string {
+	showURL, err := router.Get("articles.show").URL("id", strconv.FormatInt(a.ID, 10))
+	if err != nil {
+		checkError(err)
+		return ""
+	}
+	return showURL.String()
+}
 
 func articlesStoreHandler(w http.ResponseWriter, r *http.Request) {
 	// 表的验证
