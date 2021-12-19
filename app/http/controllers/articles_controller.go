@@ -1,11 +1,13 @@
 package controllers
 
 import (
-	"database/sql"
 	"fmt"
+	"goblog/app/models/article"
 	"goblog/pkg/logger"
 	"goblog/pkg/route"
 	"goblog/pkg/types"
+	"gorm.io/gorm"
+	"html/template"
 	"net/http"
 )
 
@@ -17,13 +19,13 @@ type ArticlesController struct {
 // Show 文章详情页面
 func (* ArticlesController) Show(w http.ResponseWriter, r *http.Request)  {
 	// 获取URL 参数
+	//id := route.GetRouteVariable("id", r)
 	id := route.GetRouteVariable("id", r)
-
 	// 读取对应文章
-	article, err := getArticleById(id)
+	article, err := article.Get(id)
 
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if err == gorm.ErrRecordNotFound {
 			// 3.1 未找到数据
 			w.WriteHeader(http.StatusNotFound)
 		} else {
@@ -35,11 +37,10 @@ func (* ArticlesController) Show(w http.ResponseWriter, r *http.Request)  {
 	} else {
 		//
 		//tmpl, err := template.ParseFiles("resources/views/articles/show.gohtml")
-
 		tmpl, err := template.New("show.gohtml").
 			Funcs(template.FuncMap{
 				"RouteName2URL": route.Name2Url,
-				"Int64ToString": types.Int64ToString,
+				"Uint64ToString": types.Uint64ToString,
 			}).ParseFiles("resources/views/articles/show.gohtml")
 
 		logger.LogError(err)
