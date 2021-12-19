@@ -6,7 +6,11 @@ import (
 )
 
 //// Router 路由对象
-//var Router *mux.Router
+var route *mux.Router
+
+func SetRoute(r *mux.Router)  {
+	route = r
+}
 //
 //// Initialize 初始化路由
 //func Initialize()  {
@@ -16,7 +20,6 @@ import (
 
 // RouteName2URL 通过路由名称获取 URL
 func Name2Url(routeName string, pairs ...string)  string{
-	var route *mux.Router
 	url, err := route.Get(routeName).URL(pairs...)
 	if err != nil {
 		return ""

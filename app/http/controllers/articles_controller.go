@@ -16,6 +16,27 @@ type ArticlesController struct {
 
 }
 
+// 文章列表页
+func (*ArticlesController) Index(w http.ResponseWriter, r *http.Request)  {
+	// 获取结果集
+	articles, err := article.GetAll()
+
+	if err != nil {
+		// 数据库错误
+		logger.LogError(err)
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprint(w, "500 服务器内部错误")
+	} else {
+		// 加载模板
+		tmpl, err := template.ParseFiles("resources/views/articles/index.gohtml")
+		logger.LogError(err)
+
+		// 渲染模板
+		err = tmpl.Execute(w, articles)
+		logger.LogError(err)
+	}
+}
+
 // Show 文章详情页面
 func (* ArticlesController) Show(w http.ResponseWriter, r *http.Request)  {
 	// 获取URL 参数
