@@ -499,8 +499,7 @@ func main() {
 	// 可以看到当请求 about/ 时产生了两个请求，第一个是 301 跳转，第二个是跳转到的 about 去掉斜杆的链接。
 	// 这个解决方案看起来不错，然而有一个严重的问题 —— 当请求方式为 POST 的时候，遇到服务端的 301 跳转，将会变成 GET 方式。很明显，这并非所愿，我们需要一个更好的方案
 
-	router.HandleFunc("/", homeHandler).Methods("GET").Name("home")
-	router.HandleFunc("/about", aboutHandler).Methods("GET").Name("about")
+
 	router.HandleFunc("/articles/{id:[0-9]+}",articlesShowHandler).Methods("GET").Name("articles.show")
 	router.HandleFunc("/articles", articlesIndexHandler).Methods("GET").Name("articles.index")
 
@@ -515,8 +514,6 @@ func main() {
 	router.HandleFunc("/articles/{id:[0-9]+}/delete", articlesDeleteHandler).Methods("POST").Name("articles.delete")
 
 
-	// 自定义 404页面
-	router.NotFoundHandler = http.HandlerFunc(notFundHandler)
 
 	// 中间件： 强制内容类型为 HTML
 	router.Use(forceHTMLMiddleware)

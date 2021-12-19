@@ -52,7 +52,7 @@ func createTables()  {
 	createArticleSQL := `CREATE TABLE IF NOT EXISTS articles(
 	id bigint(20) PRIMARY KEY AUTO_INCREMENT NOT NULL,
 	title varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-	body logtext COLLATE utf8mb4_unicode_ci
+	body longtext COLLATE utf8mb4_unicode_ci
 )`
 	_, err := DB.Exec(createArticleSQL)
 	logger.LogError(err)
