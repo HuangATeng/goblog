@@ -7,7 +7,6 @@ import (
 	"goblog/bootstrap"
 	"goblog/pkg/database"
 	"goblog/pkg/logger"
-	"goblog/pkg/route"
 	"html/template"
 	"net/http"
 	"net/url"
@@ -90,7 +89,7 @@ func articlesEditHandler(w http.ResponseWriter,r *http.Request){
 	// 获取URL参数
 	//vars := mux.Vars(r)
 	//id := vars["id"]
-	id := route.GetRouteVariable("id", r)
+	id := getRouteVariable("id", r)
 
 	// 读取对应文章
 	//article := Article{}
@@ -141,7 +140,7 @@ func getArticleById(id string) (Article, error){
 // 更新文章
 func articlesUpdateHandler(w http.ResponseWriter, r *http.Request) {
 	// 获取URL参数
-	id := route.GetRouteVariable("id", r)
+	id := getRouteVariable("id", r)
 
 	// 读取对应文章
 	_, err := getArticleById(id)
@@ -222,7 +221,7 @@ func articlesUpdateHandler(w http.ResponseWriter, r *http.Request) {
 // 删除文章
 func articlesDeleteHandler(w http.ResponseWriter, r *http.Request) {
 	// 获取URL 参数
-	id := route.GetRouteVariable("id", r)
+	id := getRouteVariable("id", r)
 
 	// 读取文章数据
 	article, err := getArticleById(id)
@@ -442,6 +441,10 @@ func removeTrailingSlash(next http.Handler) http.Handler {
 }
 
 
+func getRouteVariable(parameterName string, r *http.Request) string {
+	vars := mux.Vars(r)
+	return vars[parameterName]
+}
 
 
 
