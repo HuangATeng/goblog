@@ -346,37 +346,6 @@ func articlesStoreHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// 保存文章到数据库
-func saveArticleToDB(title string, body string) (int64, error) {
-	// 变量初始化
-	var (
-		id 	int64
-		err error
-		rs	sql.Result
-		stmt *sql.Stmt
-	)
-	fmt.Println("INSERT INTO articles (title, body) VALUES (?,?)")
-	// 获取一个 prepare 声明语句
-	stmt, err = db.Prepare("INSERT INTO articles (title, body) VALUES (?,?)")
-	// 列行错误检测
-	if err != nil {
-		return 0, err
-	}
-	// 在此函数运行结束后关闭此语句，防止占用 SQL连接
-	defer stmt.Close()
-
-	// 执行请求，传参进入绑定的内容
-	rs, err = stmt.Exec(title, body)
-	if err != nil {
-		return 0, err
-	}
-
-	// 插入成功返回 自增长ID
-	if id, err = rs.LastInsertId(); id > 0 {
-		return id, nil
-	}
-	return 0, err
-}
 
 // html标头中间件
 func forceHTMLMiddleware(next http.Handler) http.Handler {
@@ -425,12 +394,6 @@ func main() {
 	// 这个解决方案看起来不错，然而有一个严重的问题 —— 当请求方式为 POST 的时候，遇到服务端的 301 跳转，将会变成 GET 方式。很明显，这并非所愿，我们需要一个更好的方案
 
 
-	//router.HandleFunc("/articles", articlesIndexHandler).Methods("GET").Name("articles.index")
-
-
-	// 创建表单
-	router.HandleFunc("/articles/create", articlesCreateHandler).Methods("GET").Name("articles.create")
-	router.HandleFunc("/articles", articlesStoreHandler).Methods("POST").Name("articles.store")
 
 	// 更新文章
 	router.HandleFunc("/articles/{id:[0-9]+}/edit", articlesEditHandler).Methods("GET").Name("articles.edit")
