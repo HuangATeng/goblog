@@ -114,7 +114,7 @@ func articlesCreateHandler(w http.ResponseWriter, r *http.Request) {
 		<title>创建文章 —— 我的技术博客</title>
 	</head>
 	<body>
-		<form action="%s?test=data" method="post">
+		<form action="%s?tests=data" method="post">
 			<p><input type="text" name="title"></p>
 			<p><textarea name="body" cols="30" rows="10"></textarea></p>
 			<p><button type="submit">提交</button></p>
