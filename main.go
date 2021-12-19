@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/go-sql-driver/mysql"
 	"github.com/gorilla/mux"
+	"goblog/pkg/route"
 	"html/template"
 	"log"
 	"net/http"
@@ -15,8 +16,7 @@ import (
 	"unicode/utf8"
 )
 
-var router = mux.NewRouter()
-
+var router *mux.Router
 var db *sql.DB
 
 func homeHandler(w http.ResponseWriter, r *http.Request) {
@@ -61,7 +61,7 @@ func articlesShowHandler(w http.ResponseWriter, r *http.Request)  {
 
 		tmpl, err := template.New("show.gohtml").
 			Funcs(template.FuncMap{
-				"RouteName2URL": RouteName2URL,
+				"RouteName2URL": route.Name2Url,
 				"Int64ToString": Int64ToString,
 		}).ParseFiles("resources/views/articles/show.gohtml")
 
@@ -516,16 +516,7 @@ func initDB() {
 	checkError(err)
 }
 
-// RouteName2URL 通过路由名称获取URL
-func RouteName2URL(routeName string, pairs ...string) string {
-	url, err := router.Get(routeName).URL(pairs...)
-	if err != nil {
-		checkError(err)
-		return ""
-	}
 
-	return url.String()
-}
 
 // Int64ToString 将int64 转为 string
 func Int64ToString(num int64) string {
@@ -550,9 +541,10 @@ func createTables() {
 
 func main() {
 	initDB()
-	//createTables()
+	createTables()
 
-	//router := mux.NewRouter()
+	route.Initialize()
+	router = route.Router
 	//处理斜杠问题 localhost:3000/about/ 出现404解决
 	// 可以看到当请求 about/ 时产生了两个请求，第一个是 301 跳转，第二个是跳转到的 about 去掉斜杆的链接。
 	// 这个解决方案看起来不错，然而有一个严重的问题 —— 当请求方式为 POST 的时候，遇到服务端的 301 跳转，将会变成 GET 方式。很明显，这并非所愿，我们需要一个更好的方案
