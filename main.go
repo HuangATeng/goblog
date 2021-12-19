@@ -457,6 +457,7 @@ func main() {
 
 	//route.Initialize()
 	//router = route.Router
+	bootstrap.SetupDB()
 	router = bootstrap.SetupRoute()
 	//处理斜杠问题 localhost:3000/about/ 出现404解决
 	// 可以看到当请求 about/ 时产生了两个请求，第一个是 301 跳转，第二个是跳转到的 about 去掉斜杆的链接。
