@@ -4,10 +4,10 @@ import (
 	"database/sql"
 	"fmt"
 	"github.com/gorilla/mux"
+	"goblog/bootstrap"
 	"goblog/pkg/database"
 	"goblog/pkg/logger"
 	"goblog/pkg/route"
-	"goblog/pkg/types"
 	"html/template"
 	"net/http"
 	"net/url"
@@ -33,47 +33,6 @@ func notFundHandler(w http.ResponseWriter, r *http.Request){
 	fmt.Fprint(w,"<h1>not found</h1>")
 }
 
-func articlesShowHandler(w http.ResponseWriter, r *http.Request)  {
-	// 获取URL 参数
-	//vars := mux.Vars(r)
-	//id := vars["id"]
-	id := route.GetRouteVariable("id", r)
-
-	// 读取对应文章
-	//article := Article{}
-	//query := "SELECT * FROM articles WHERE id = ?"
-	//err := db.QueryRow(query, id).Scan(&article.ID, &article.Title, &article.Body)
-	article, err := getArticleById(id)
-
-	if err != nil {
-		if err == sql.ErrNoRows {
-			// 3.1 未找到数据
-			w.WriteHeader(http.StatusNotFound)
-		} else {
-			// 数据错误
-			logger.LogError(err)
-			w.WriteHeader(http.StatusInternalServerError)
-			fmt.Fprint(w, "500 服务器内部错误")
-		}
-	} else {
-		//
-		//tmpl, err := template.ParseFiles("resources/views/articles/show.gohtml")
-
-		tmpl, err := template.New("show.gohtml").
-			Funcs(template.FuncMap{
-				"RouteName2URL": route.Name2Url,
-				"Int64ToString": types.Int64ToString,
-		}).ParseFiles("resources/views/articles/show.gohtml")
-
-		//fmt.Fprint(w, "读取成功，文章标题 -- " + article.Title)
-		logger.LogError(err)
-
-		err = tmpl.Execute(w, article)
-		logger.LogError(err)
-	}
-
-	//fmt.Fprint(w, "文章ID: " + id)
-}
 
 func articlesIndexHandler(w http.ResponseWriter, r *http.Request) {
 	// 执行查询语句，返回一个结果集
@@ -493,14 +452,14 @@ func main() {
 	database.Initialize()
 	db = database.DB
 
-	route.Initialize()
-	router = route.Router
+	//route.Initialize()
+	//router = route.Router
+	router = bootstrap.SetupRoute()
 	//处理斜杠问题 localhost:3000/about/ 出现404解决
 	// 可以看到当请求 about/ 时产生了两个请求，第一个是 301 跳转，第二个是跳转到的 about 去掉斜杆的链接。
 	// 这个解决方案看起来不错，然而有一个严重的问题 —— 当请求方式为 POST 的时候，遇到服务端的 301 跳转，将会变成 GET 方式。很明显，这并非所愿，我们需要一个更好的方案
 
 
-	router.HandleFunc("/articles/{id:[0-9]+}",articlesShowHandler).Methods("GET").Name("articles.show")
 	router.HandleFunc("/articles", articlesIndexHandler).Methods("GET").Name("articles.index")
 
 
