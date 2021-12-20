@@ -9,6 +9,7 @@ import (
 	"gorm.io/gorm"
 	"html/template"
 	"net/http"
+	"path/filepath"
 	"strconv"
 	"unicode/utf8"
 )
@@ -30,11 +31,27 @@ func (*ArticlesController) Index(w http.ResponseWriter, r *http.Request)  {
 		fmt.Fprint(w, "500 服务器内部错误")
 	} else {
 		// 加载模板
-		tmpl, err := template.ParseFiles("resources/views/articles/index.gohtml")
+		// 设置模板相对路径
+		viewDir := "resources/views"
+
+		// 所有布局模板文件 Slice
+		files, err := filepath.Glob(viewDir + "/layouts/*.gohtml")
 		logger.LogError(err)
 
-		// 渲染模板
-		err = tmpl.Execute(w, articles)
+		// 在 Slice 新增目标文件
+		newFiles := append(files, viewDir + "/articles/index.gohtml")
+
+		// 解析模板文件
+		tmpl, err := template.ParseFiles(newFiles...)
+
+		//tmpl, err := template.ParseFiles("resources/views/articles/index.gohtml")
+		logger.LogError(err)
+
+		//渲染模板
+		//err = tmpl.Execute(w, articles)
+
+		// 渲染模板， 将所有文章数据传输进去 myapp 是模板关键词define 定义的模板名称 而不是文件名称
+		err = tmpl.ExecuteTemplate(w, "app", articles)
 		logger.LogError(err)
 	}
 }
