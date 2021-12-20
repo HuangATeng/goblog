@@ -5,11 +5,10 @@ import (
 	"goblog/app/models/article"
 	"goblog/pkg/logger"
 	"goblog/pkg/route"
-	"goblog/pkg/types"
+	"goblog/pkg/view"
 	"gorm.io/gorm"
 	"html/template"
 	"net/http"
-	"path/filepath"
 	"strconv"
 	"unicode/utf8"
 )
@@ -30,29 +29,7 @@ func (*ArticlesController) Index(w http.ResponseWriter, r *http.Request)  {
 		w.WriteHeader(http.StatusInternalServerError)
 		fmt.Fprint(w, "500 服务器内部错误")
 	} else {
-		// 加载模板
-		// 设置模板相对路径
-		viewDir := "resources/views"
-
-		// 所有布局模板文件 Slice
-		files, err := filepath.Glob(viewDir + "/layouts/*.gohtml")
-		logger.LogError(err)
-
-		// 在 Slice 新增目标文件
-		newFiles := append(files, viewDir + "/articles/index.gohtml")
-
-		// 解析模板文件
-		tmpl, err := template.ParseFiles(newFiles...)
-
-		//tmpl, err := template.ParseFiles("resources/views/articles/index.gohtml")
-		logger.LogError(err)
-
-		//渲染模板
-		//err = tmpl.Execute(w, articles)
-
-		// 渲染模板， 将所有文章数据传输进去 myapp 是模板关键词define 定义的模板名称 而不是文件名称
-		err = tmpl.ExecuteTemplate(w, "app", articles)
-		logger.LogError(err)
+		view.Render(w, "articles.index", articles)
 	}
 }
 
@@ -76,34 +53,7 @@ func (* ArticlesController) Show(w http.ResponseWriter, r *http.Request)  {
 		}
 	} else {
 		//
-		//tmpl, err := template.ParseFiles("resources/views/articles/show.gohtml")
-		// 设置模板相对路径
-		viewDir := "resources/views"
-
-		// 布局所有模板文件
-		files, err := filepath.Glob(viewDir + "/layouts/*.gohtml")
-		logger.LogError(err)
-		// Slice 新增目标文件
-		newFiles := append(files, viewDir + "/articles/show.gohtml")
-
-		// 解析模板文件
-		tmpl, err := template.New("show.gothml").
-			Funcs(template.FuncMap{
-				"RouteName2URL": route.Name2Url,
-				"Uint64ToString": types.Uint64ToString,
-		}).ParseFiles(newFiles...)
-		//tmpl, err := template.New("show.gohtml").
-		//	Funcs(template.FuncMap{
-		//		"RouteName2URL": route.Name2Url,
-		//		"Uint64ToString": types.Uint64ToString,
-		//	}).ParseFiles("resources/views/articles/show.gohtml")
-
-		logger.LogError(err)
-
-		//err = tmpl.Execute(w, article)
-		// 渲染模板
-		err = tmpl.ExecuteTemplate(w, "app", article)
-		logger.LogError(err)
+		view.Render(w, "articles.show", article)
 	}
 }
 
