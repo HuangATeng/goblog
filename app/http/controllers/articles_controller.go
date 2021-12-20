@@ -77,15 +77,32 @@ func (* ArticlesController) Show(w http.ResponseWriter, r *http.Request)  {
 	} else {
 		//
 		//tmpl, err := template.ParseFiles("resources/views/articles/show.gohtml")
-		tmpl, err := template.New("show.gohtml").
+		// 设置模板相对路径
+		viewDir := "resources/views"
+
+		// 布局所有模板文件
+		files, err := filepath.Glob(viewDir + "/layouts/*.gohtml")
+		logger.LogError(err)
+		// Slice 新增目标文件
+		newFiles := append(files, viewDir + "/articles/show.gohtml")
+
+		// 解析模板文件
+		tmpl, err := template.New("show.gothml").
 			Funcs(template.FuncMap{
 				"RouteName2URL": route.Name2Url,
 				"Uint64ToString": types.Uint64ToString,
-			}).ParseFiles("resources/views/articles/show.gohtml")
+		}).ParseFiles(newFiles...)
+		//tmpl, err := template.New("show.gohtml").
+		//	Funcs(template.FuncMap{
+		//		"RouteName2URL": route.Name2Url,
+		//		"Uint64ToString": types.Uint64ToString,
+		//	}).ParseFiles("resources/views/articles/show.gohtml")
 
 		logger.LogError(err)
 
-		err = tmpl.Execute(w, article)
+		//err = tmpl.Execute(w, article)
+		// 渲染模板
+		err = tmpl.ExecuteTemplate(w, "app", article)
 		logger.LogError(err)
 	}
 }
