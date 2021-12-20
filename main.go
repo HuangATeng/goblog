@@ -2,6 +2,8 @@ package main
 
 import (
 	"database/sql"
+	"goblog/app/http/middlewares"
+
 	//"database/sql"
 	"fmt"
 	"github.com/gorilla/mux"
@@ -12,7 +14,6 @@ import (
 	"net/http"
 	"net/url"
 	"strconv"
-	"strings"
 	"unicode/utf8"
 )
 
@@ -159,28 +160,9 @@ func (a Article) Delete() (rowsAffected int64, err error)  {
 
 
 
-// html标头中间件
-func forceHTMLMiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// 设置标头
-		w.Header().Set("Content-Type", "text/html; charset=utf-8")
 
-		// 继续处理请求
-		next.ServeHTTP(w, r)
-	})
-}
 
-// 去除URL后缀 "/"
-func removeTrailingSlash(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// 除首页以外，移除所有请求路径后面的斜杠
-		if r.URL.Path != "/" {
-			r.URL.Path = strings.TrimSuffix(r.URL.Path, "/")
-		}
-		// 将请求传递下去
-		next.ServeHTTP(w, r)
-	})
-}
+
 
 
 func getRouteVariable(parameterName string, r *http.Request) string {
@@ -201,21 +183,9 @@ func main() {
 	//router = route.Router
 	bootstrap.SetupDB()
 	router = bootstrap.SetupRoute()
-	//处理斜杠问题 localhost:3000/about/ 出现404解决
-	// 可以看到当请求 about/ 时产生了两个请求，第一个是 301 跳转，第二个是跳转到的 about 去掉斜杆的链接。
-	// 这个解决方案看起来不错，然而有一个严重的问题 —— 当请求方式为 POST 的时候，遇到服务端的 301 跳转，将会变成 GET 方式。很明显，这并非所愿，我们需要一个更好的方案
-
-
-
-	// 更新文章
-	//router.HandleFunc("/articles/{id:[0-9]+}/edit", articlesEditHandler).Methods("GET").Name("articles.edit")
-	//router.HandleFunc("/articles/{id:[0-9]+}", articlesUpdateHandler).Methods("POST").Name("articles.update")
-
-
-	// 中间件： 强制内容类型为 HTML
-	router.Use(forceHTMLMiddleware)
-
 
 	// url 后缀处理
-	http.ListenAndServe(":3000", removeTrailingSlash(router))
+	err := http.ListenAndServe(":3000", middlewares.RemoveTrailingSlash(router))
+	logger.LogError(err)
+	//http.ListenAndServe(":3000", removeTrailingSlash(router))
 }
