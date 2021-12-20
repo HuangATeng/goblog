@@ -2,12 +2,13 @@ package main
 
 import (
 	"database/sql"
+	//"database/sql"
 	"fmt"
 	"github.com/gorilla/mux"
 	"goblog/bootstrap"
 	"goblog/pkg/database"
 	"goblog/pkg/logger"
-	"html/template"
+	//"html/template"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -54,50 +55,6 @@ func articlesCreateHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, html, storeURL)
 }
 
-// 编辑文章
-func articlesEditHandler(w http.ResponseWriter,r *http.Request){
-	// 获取URL参数
-	//vars := mux.Vars(r)
-	//id := vars["id"]
-	id := getRouteVariable("id", r)
-
-	// 读取对应文章
-	//article := Article{}
-	//query := "SELECT * FROM articles WHERE id = ?"
-	//err := db.QueryRow(query, id).Scan(&article.ID, &article.Title, &article.Body)
-	article, err := getArticleById(id)
-	if err != nil {
-		if err == sql.ErrNoRows {
-			// 数据未找到
-			w.WriteHeader(http.StatusNotFound)
-			fmt.Fprint(w, "404 文章未找到")
-		} else {
-			// 数据库错误
-			logger.LogError(err)
-			w.WriteHeader(http.StatusInternalServerError)
-			fmt.Fprint(w, "500服务器内部错误")
-		}
-	} else {
-		// 4 读取成功，显示表单
-		updateURL, _ := router.Get("articles.update").URL("id", id)
-		storeURL, _ := router.Get("articles.store").URL()
-		data := ArticlesFormData{
-			Title: article.Title,
-			Body: article.Body,
-			URL: updateURL,
-			Errors: nil,
-		}
-		fmt.Println(updateURL)
-		fmt.Println(storeURL)
-		fmt.Println("1111")
-		tmpl, err := template.ParseFiles("resources/views/articles/edit.gohtml")
-		logger.LogError(err)
-		err = tmpl.Execute(w, data)
-		logger.LogError(err)
-	}
-
-}
-
 
 
 func getArticleById(id string) (Article, error){
@@ -107,86 +64,6 @@ func getArticleById(id string) (Article, error){
 	return article, err
 }
 
-// 更新文章
-func articlesUpdateHandler(w http.ResponseWriter, r *http.Request) {
-	// 获取URL参数
-	id := getRouteVariable("id", r)
-
-	// 读取对应文章
-	_, err := getArticleById(id)
-
-	// 判断是否出错
-	if err != nil {
-		if err == sql.ErrNoRows {
-			// 未查询到数据
-			w.WriteHeader(http.StatusNotFound)
-			fmt.Fprint(w, "404 文章不存在")
-		} else {
-			// 数据库错误
-			logger.LogError(err)
-			w.WriteHeader(http.StatusInternalServerError)
-			fmt.Fprint(w, "500 服务器内部错误")
-		}
-	} else {
-		//表单验证
-		title := r.PostFormValue("title")
-		body := r.PostFormValue("body")
-
-		//errors := make(map[string]string)
-		//
-		//// 验证标题
-		//if title == "" {
-		//	errors["title"] = "标题不能为空"
-		//} else if utf8.RuneCountInString(title) < 3 || utf8.RuneCountInString(title) > 40 {
-		//	errors["title"] = "标题长度需介于 3 - 40 个字符"
-		//}
-		//
-		//// 验证body
-		//if body == "" {
-		//	errors["body"] = "文章内容不能为空"
-		//} else if utf8.RuneCountInString(body) < 10 {
-		//	errors["body"] = "文章内容需大于等于10个字符"
-		//}
-		errors := validateArticleFormData(title, body)
-		//log.Println(errors)
-		if len(errors) == 0 {
-			// 更新数据库
-			query := "UPDATE articles SET title = ?, body = ? WHERE id = ?"
-			rs, err := db.Exec(query, title, body, id)
-			if err != nil {
-				logger.LogError(err)
-				w.WriteHeader(http.StatusInternalServerError)
-				fmt.Fprint(w, "500 服务器内部错误")
-			}
-
-			// 更新成功跳转文章详情页
-			if n, _ := rs.RowsAffected(); n > 0 {
-				showURL, _ := router.Get("articles.show").URL("id", id)
-				fmt.Println(n)
-				http.Redirect(w, r, showURL.String(), http.StatusFound)
-			} else {
-				fmt.Fprint(w, "未做任何更新")
-			}
-		} else {
-			// 表单验证不通过， 显示理由
-			updateURL, _ := router.Get("articles.update").URL("id", id)
-
-			data := ArticlesFormData{
-				Title: title,
-				Body: body,
-				URL: updateURL,
-				Errors: errors,
-			}
-			tmpl, err := template.ParseFiles("resources/views/articles/edit.gohtml")
-			logger.LogError(err)
-
-
-			err = tmpl.Execute(w, data)
-			logger.LogError(err)
-
-		}
-	}
-}
 
 // 删除文章
 func articlesDeleteHandler(w http.ResponseWriter, r *http.Request) {
@@ -280,71 +157,6 @@ func (a Article) Delete() (rowsAffected int64, err error)  {
 	return 0, nil
 }
 
-func articlesStoreHandler(w http.ResponseWriter, r *http.Request) {
-	// 表的验证
-	title := r.PostFormValue("title")
-	body := r.PostFormValue("body")
-
-	//errors := make(map[string]string)
-	// 内建函数len() 可以用来获取 切片、字符串、通道(channel) 等长度
-	// go 语言的字符都是以UTF-8格式保存，每个中文占用3个字节，因此使用len() 获得长度为 字符个数 * 3
-	// 如果需要获取字符个数需要用Go语言中utf8 提供的RuneCountInString() 函数计算
-	// 验证标题
-	//if title == "" {
-	//	errors["title"] = "标题不能为空"
-	//} else if len(title) < 3 || len(title) > 40 {
-	//	errors["title"] = "标题长度需介于 3-40"
-	//}
-
-	//if title == "" {
-	//	errors["title"] = "标题不能为空"
-	//} else if utf8.RuneCountInString(title) < 3 || utf8.RuneCountInString(title) > 40 {
-	//	errors["title"] = "标题字符个数需介于 3-40"
-	//}
-	//
-	//// 验证内容
-	//if body == "" {
-	//	errors["body"] = "内容不能为空"
-	//} else if len(body) < 10 {
-	//	errors["body"] = "内容长度须大于或等于 10 字节"
-	//}
-
-	errors := validateArticleFormData(title, body)
-
-	// 检查是否有错误
-	if len(errors) == 0 {
-		lastInsertID, err := saveArticleToDB(title, body)
-		if lastInsertID > 0 {
-			fmt.Fprintf(w, "插入成功， ID 为" + strconv.FormatInt(lastInsertID,10))
-		}else {
-			logger.LogError(err)
-			w.WriteHeader(http.StatusInternalServerError)
-			fmt.Fprint(w, "500 服务器内部错误")
-		}
-	} else {
-
-		storeURL, _ := router.Get("articles.store").URL()
-
-		data := ArticlesFormData{
-			Title: title,
-			Body: body,
-			URL: storeURL,
-			Errors: errors,
-		}
-
-		//tmpl, err := template.New("create-form").Parse(html)
-		tmpl, err := template.ParseFiles("resources/views/articles/create.gohtml")
-		if err != nil {
-			panic(err)
-		}
-
-		err = tmpl.Execute(w, data)
-		if err != nil {
-			panic(err)
-		}
-
-	}
-}
 
 
 // html标头中间件
@@ -396,10 +208,8 @@ func main() {
 
 
 	// 更新文章
-	router.HandleFunc("/articles/{id:[0-9]+}/edit", articlesEditHandler).Methods("GET").Name("articles.edit")
-	router.HandleFunc("/articles/{id:[0-9]+}", articlesUpdateHandler).Methods("POST").Name("articles.update")
-	router.HandleFunc("/articles/{id:[0-9]+}/delete", articlesDeleteHandler).Methods("POST").Name("articles.delete")
-
+	//router.HandleFunc("/articles/{id:[0-9]+}/edit", articlesEditHandler).Methods("GET").Name("articles.edit")
+	//router.HandleFunc("/articles/{id:[0-9]+}", articlesUpdateHandler).Methods("POST").Name("articles.update")
 
 
 	// 中间件： 强制内容类型为 HTML
