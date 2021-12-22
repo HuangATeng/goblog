@@ -42,6 +42,7 @@ func RegisterWebRoutes(r *mux.Router){
 	// 用户登录认证路由
 	r.HandleFunc("/auth/login", auc.Login).Methods("GET").Name("auth.login")
 	r.HandleFunc("/auth/dologin", auc.DoLogin).Methods("POST").Name("auth.dologin")
+	r.HandleFunc("/auth/logout", auc.Logout).Methods("POST").Name("auth.logout")
 
 
 	// 静态资源
