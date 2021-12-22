@@ -12,12 +12,13 @@ import (
 func RegisterWebRoutes(r *mux.Router){
 	// 静态页面
 	pc := new (controllers.PagesController)
-	r.HandleFunc("/", pc.Home).Methods("GET").Name("home")
+	//r.HandleFunc("/", pc.Home).Methods("GET").Name("home")
 	r.HandleFunc("/about", pc.About).Methods("GET").Name("about")
 	r.NotFoundHandler = http.HandlerFunc(pc.NotFound)
 
 	// 文章相关页面
 	ac := new (controllers.ArticlesController)
+	r.HandleFunc("/", ac.Index).Methods("GET").Name("home")
 	r.HandleFunc("/articles/{id:[0-9]+}", ac.Show).Methods("GET").Name("articles.show")
 
 	// 文章列表
@@ -46,6 +47,7 @@ func RegisterWebRoutes(r *mux.Router){
 	// 静态资源
 	r.PathPrefix("/css/").Handler(http.FileServer(http.Dir("./public")))
 	r.PathPrefix("/js/").Handler(http.FileServer(http.Dir("./public")))
+
 
 	// 中间件： 强制内容类型为 HTML
 	//r.Use(middlewares.ForceHTML)

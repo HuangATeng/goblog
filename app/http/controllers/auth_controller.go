@@ -75,7 +75,7 @@ func (*AuthController) DoLogin(w http.ResponseWriter, r *http.Request)  {
 	password := r.PostFormValue("password")
 
 	// 尝试登录
-	if err := auth.Attempt(emgail, password); err == nil {
+	if err := auth.Attempt(email, password); err == nil {
 		// 登录成功
 		http.Redirect(w, r, "/", http.StatusFound)
 	} else {

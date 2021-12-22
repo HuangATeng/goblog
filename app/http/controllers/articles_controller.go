@@ -28,7 +28,9 @@ func (*ArticlesController) Index(w http.ResponseWriter, r *http.Request)  {
 		w.WriteHeader(http.StatusInternalServerError)
 		fmt.Fprint(w, "500 服务器内部错误")
 	} else {
-		view.Render(w,  articles, "articles.index")
+		view.Render(w,  view.D{
+			"Articles": articles,
+		}, "articles.index")
 	}
 }
 
@@ -39,7 +41,6 @@ func (* ArticlesController) Show(w http.ResponseWriter, r *http.Request)  {
 	id := route.GetRouteVariable("id", r)
 	// 读取对应文章
 	article, err := article.Get(id)
-
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			// 3.1 未找到数据
@@ -52,36 +53,16 @@ func (* ArticlesController) Show(w http.ResponseWriter, r *http.Request)  {
 		}
 	} else {
 		//
-		view.Render(w,  article, "articles.show")
+		view.Render(w,  view.D{
+			"Article": article,
+		}, "articles.show")
 	}
 }
 
-// ArticlesFormData 创建博文表单数据
-//type ArticlesFormData struct {
-//	Title, Body string
-//	Article article.Article
-//	Errors 		map[string]string
-//}
 
 // 创建文章页面
 func (*ArticlesController) Create(w http.ResponseWriter, r *http.Request)  {
 	// 注意 form 元素那里我们使用了 RouteName2URL 因为不需要传参 URL 参数，模板里我们直接使用 RouteName2URL 生成 URL，代码可以变得很简洁：
-	//storeURL := route.Name2Url("articles.store")
-	//data := ArticlesFormData{
-	//	Title: "",
-	//	Body: "",
-	//	URL:	storeURL,
-	//	Errors: nil,
-	//}
-	//tmpl, err := template.ParseFiles("resources/views/articles/create.gohtml")
-	//if err != nil {
-	//	panic(err)
-	//}
-	//
-	//err = tmpl.Execute(w, data)
-	//if err != nil {
-	//	panic(err)
-	//}
 	view.Render(w,  view.D{}, "articles.create", "articles._form_field")
 }
 
@@ -113,24 +94,6 @@ func (*ArticlesController) Store(w http.ResponseWriter, r *http.Request)  {
 			"Body": body,
 			"Errors": errors,
 		},"articles.create","articles._form_field")
-		//storeURL := route.Name2Url("articles.store")
-		//
-		//data := ArticlesFormData{
-		//	Title: title,
-		//	Body: body,
-		//	URL: storeURL,
-		//	Errors: errors,
-		//}
-		//
-		//tmpl, err := template.ParseFiles("resources/views/articles/create.gohtml")
-		//if err != nil {
-		//	panic(err)
-		//}
-		//
-		//err = tmpl.Execute(w, data)
-		//if err != nil {
-		//	panic(err)
-		//}
 
 	}
 }
@@ -161,7 +124,7 @@ func validateArticleFormData(title string, body string) map[string]string {
 func (*ArticlesController) Edit(w http.ResponseWriter,r *http.Request) {
 	// 获取URL参数
 	id := route.GetRouteVariable("id", r)
-
+	fmt.Println(id)
 	// 读取对应文章
 	_article, err := article.Get(id)
 	if err != nil {
@@ -177,18 +140,6 @@ func (*ArticlesController) Edit(w http.ResponseWriter,r *http.Request) {
 		}
 	} else {
 		// 4 读取成功，显示表单
-		//updateURL := route.Name2Url("articles.update", "id", id)
-		//
-		//data := ArticlesFormData{
-		//	Title: article.Title,
-		//	Body: article.Body,
-		//	URL: updateURL,
-		//	Errors: nil,
-		//}
-		//tmpl, err := template.ParseFiles("resources/views/articles/edit.gohtml")
-		//logger.LogError(err)
-		//err = tmpl.Execute(w, data)
-		//logger.LogError(err)
 		view.Render(w, view.D{
 			"Title": _article.Title,
 			"Body": _article.Body,
@@ -254,20 +205,6 @@ func (*ArticlesController) Update(w http.ResponseWriter, r *http.Request) {
 				"Article": _article,
 				"Errors": errors,
 			},"articles.edit", "articles._form_field")
-			//updateURL := route.Name2Url("articles.update", "id", id)
-			//
-			//data := ArticlesFormData{
-			//	Title: title,
-			//	Body: body,
-			//	URL: updateURL,
-			//	Errors: errors,
-			//}
-			//tmpl, err := template.ParseFiles("resources/views/articles/edit.gohtml")
-			//logger.LogError(err)
-			//
-			//
-			//err = tmpl.Execute(w, data)
-			//logger.LogError(err)
 
 		}
 	}
