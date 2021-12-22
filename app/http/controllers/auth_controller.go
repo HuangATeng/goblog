@@ -60,6 +60,14 @@ func (*AuthController) DoRegister(w http.ResponseWriter, r *http.Request)  {
 			fmt.Fprint(w,"创建用户失败, 请联系管理员")
 		}
 	}
+}
 
+// Login 显示登录表单
+func (*AuthController) Login(w http.ResponseWriter, r *http.Request) {
+	view.RenderSimple(w, view.D{}, "auth.login")
+}
 
+// DoLogin 登录表单提交验证
+func (*AuthController) DoLogin(w http.ResponseWriter, r *http.Request)  {
+	//
 }
