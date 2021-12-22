@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"goblog/app/models/user"
 	"goblog/app/requests"
+	"goblog/pkg/auth"
 	"goblog/pkg/view"
 	"net/http"
 )
@@ -69,5 +70,20 @@ func (*AuthController) Login(w http.ResponseWriter, r *http.Request) {
 
 // DoLogin 登录表单提交验证
 func (*AuthController) DoLogin(w http.ResponseWriter, r *http.Request)  {
-	//
+	//初始化表单数据
+	email := r.PostFormValue("email")
+	password := r.PostFormValue("password")
+
+	// 尝试登录
+	if err := auth.Attempt(emgail, password); err == nil {
+		// 登录成功
+		http.Redirect(w, r, "/", http.StatusFound)
+	} else {
+		// 失败，显示错误
+		view.RenderSimple(w, view.D{
+			"Error":		err.Error(),
+			"Email":		email,
+			"Password":		password,
+		}, "auth.login")
+	}
 }
