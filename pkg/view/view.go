@@ -49,6 +49,6 @@ func RenderTemplate(w io.Writer, name string, data interface{}, tplFiles...strin
 	logger.LogError(err)
 
 	// 渲染模板
-	err = tmpl.ExecuteTemplate(w, "app", data)
+	err = tmpl.ExecuteTemplate(w, name, data)
 	logger.LogError(err)
 }
