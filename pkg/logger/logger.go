@@ -8,3 +8,7 @@ func LogError(err error)  {
 		log.Println(err)
 	}
 }
+
+func LogInfo(mesg interface{})  {
+	log.Println(mesg)
+}

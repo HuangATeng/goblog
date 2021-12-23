@@ -1,6 +1,7 @@
 package user
 
 import (
+	"fmt"
 	"goblog/app/models"
 	"goblog/pkg/logger"
 	"goblog/pkg/model"
@@ -24,6 +25,7 @@ type User struct {
 
 // Create 创建用户， 通过 User.ID 判断是否成功
 func (user *User) Create() (err error) {
+	fmt.Println(user)
 	if err = model.DB.Create(&user).Error; err != nil {
 		logger.LogError(err)
 		return err

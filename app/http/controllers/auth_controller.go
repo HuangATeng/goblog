@@ -43,9 +43,6 @@ func (*AuthController) DoRegister(w http.ResponseWriter, r *http.Request)  {
 	errs := requests.ValidateRegistrationForm(_user)
 
 	if len(errs) > 0 {
-		// 有错误
-		//data, _ := json.MarshalIndent(errs, "", " ")
-		//fmt.Fprint(w, string(data))
 		// 表单验证不通过
 		view.RenderSimple(w, view.D{
 			"Errors": 	errs,
@@ -55,7 +52,6 @@ func (*AuthController) DoRegister(w http.ResponseWriter, r *http.Request)  {
 		_user.Create()
 
 		if _user.ID > 0 {
-			//fmt.Fprint(w, "插入成功， ID 为"+ _user.GetStringID())
 			// 注册成功跳，登录用户并跳转首页
 			auth.Login(_user)
 			http.Redirect(w, r, "/", http.StatusFound)
