@@ -23,7 +23,7 @@ type AuthController struct {
 
 // Register 注册页面
 func (*AuthController) Register(w http.ResponseWriter, r *http.Request)  {
-	view.Render(w, view.D{}, "auth.register")
+	view.RenderSimple(w, view.D{}, "auth.register")
 }
 
 // DoRegister 注册逻辑处理
@@ -55,7 +55,10 @@ func (*AuthController) DoRegister(w http.ResponseWriter, r *http.Request)  {
 		_user.Create()
 
 		if _user.ID > 0 {
-			fmt.Fprint(w, "插入成功， ID 为"+ _user.GetStringID())
+			//fmt.Fprint(w, "插入成功， ID 为"+ _user.GetStringID())
+			// 注册成功跳，登录用户并跳转首页
+			auth.Login(_user)
+			http.Redirect(w, r, "/", http.StatusFound)
 		} else {
 			w.WriteHeader(http.StatusInternalServerError)
 			fmt.Fprint(w,"创建用户失败, 请联系管理员")
