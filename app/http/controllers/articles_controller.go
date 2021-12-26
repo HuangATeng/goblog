@@ -2,19 +2,23 @@ package controllers
 
 import (
 	"fmt"
+	"goblog/app/models"
 	"goblog/app/models/article"
+	"goblog/app/requests"
 	"goblog/pkg/logger"
 	"goblog/pkg/route"
 	"goblog/pkg/view"
 	"gorm.io/gorm"
 	"net/http"
-	"strconv"
 	"unicode/utf8"
 )
 
 // ArticlesController 文章相关页面
 type ArticlesController struct {
+	models.BaseModel
 
+	Title	string `gorm:"type:varchar(255);not null;" valid:"title"`
+	Body 	string `gorm:"type:longtext;not null"; valid:"body"`
 }
 
 // 文章列表页
@@ -68,30 +72,30 @@ func (*ArticlesController) Create(w http.ResponseWriter, r *http.Request)  {
 
 // 保存文章
 func (*ArticlesController) Store(w http.ResponseWriter, r *http.Request)  {
-	// 表的验证
-	title := r.PostFormValue("title")
-	body := r.PostFormValue("body")
+	// 初始化数据
+	_article := article.Article{
+		Title:	r.PostFormValue("title"),
+		Body:	r.PostFormValue("body"),
+	}
 
-	errors := validateArticleFormData(title, body)
+	// 表的验证
+	errors := requests.ValidateArticleForm(_article)
 
 	// 检查是否有错误
 	if len(errors) == 0 {
-		_article := article.Article{
-			Title: title,
-			Body: body,
-		}
+
 		_article.Create()
 
 		if _article.ID > 0 {
-			fmt.Fprintf(w, "插入成功， ID 为" + strconv.FormatUint(_article.ID,10))
+			indexUrl := route.Name2Url("article.show", "id", _article.GetStringID())
+			http.Redirect(w, r, indexUrl, http.StatusFound)
 		}else {
 			w.WriteHeader(http.StatusInternalServerError)
 			fmt.Fprint(w, "文章创建失败，请联系管理员")
 		}
 	} else {
 		view.Render(w, view.D{
-			"Title": title,
-			"Body": body,
+			"Article": _article,
 			"Errors": errors,
 		},"articles.create","articles._form_field")
 
@@ -141,9 +145,8 @@ func (*ArticlesController) Edit(w http.ResponseWriter,r *http.Request) {
 	} else {
 		// 4 读取成功，显示表单
 		view.Render(w, view.D{
-			"Title": _article.Title,
-			"Body": _article.Body,
-			"Article": _article,
+			"Errors":	view.D{},
+			"Article": 	_article,
 			//"Errors": nil,
 		},"articles.edit", "articles._form_field")
 	}
@@ -200,8 +203,6 @@ func (*ArticlesController) Update(w http.ResponseWriter, r *http.Request) {
 		} else {
 			// 表单验证不通过， 显示理由
 			view.Render(w, view.D{
-				"Title": title,
-				"Body": body,
 				"Article": _article,
 				"Errors": errors,
 			},"articles.edit", "articles._form_field")
