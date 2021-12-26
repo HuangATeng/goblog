@@ -5,8 +5,12 @@ import (
 	"goblog/app/models/user"
 	"goblog/app/requests"
 	"goblog/pkg/auth"
+	"goblog/pkg/sedemail"
 	"goblog/pkg/view"
+	"math/rand"
 	"net/http"
+	"strconv"
+	"time"
 )
 
 // AuthController 处理静态页面
@@ -91,4 +95,76 @@ func (*AuthController) DoLogin(w http.ResponseWriter, r *http.Request)  {
 func (*AuthController) Logout(w http.ResponseWriter, r *http.Request)  {
 	auth.Logout()
 	http.Redirect(w, r, "/", http.StatusFound)
+}
+
+// Retrieve 密码找回
+func (*AuthController) Retrieve(w http.ResponseWriter, r *http.Request)  {
+	fmt.Println("1111")
+	view.RenderSimple(w, view.D{}, "auth.retrieve")
+}
+
+// Doretrieve 发送验证码
+func (*AuthController) Doretrieve(w http.ResponseWriter, r *http.Request)  {
+	email := r.PostFormValue("email")
+
+	_user, err := user.GetByEmail(email)
+
+	if err != nil {
+		// 账号不存在
+		view.RenderSimple(w, view.D{
+			"Error":		"邮箱不存在" + err.Error(),
+			"Email":		email,
+		}, "auth.retrieve")
+	} else {
+		// 账号验证通过发送验证码
+		rand.Seed(time.Now().Unix())
+		num := rand.Intn(10000)
+		text := fmt.Sprintf("您的验证码是：%d", num)
+		sedemail.SendEmail("ht19910000@163.com",_user.Email, "goblog 博客密码找回", "TFXQXEGWNOJVWOVE", text)
+		view.RenderSimple(w, view.D{"message":"验证码已发送至您邮箱","success":true}, "auth.retrieve")
+	}
+}
+
+// 修改密码
+func (*AuthController) Update(w http.ResponseWriter, r *http.Request)  {
+	view.RenderSimple(w, view.D{}, "auth.update")
+}
+
+func (*AuthController) Doupdate(w http.ResponseWriter, r *http.Request)  {
+	email := r.PostFormValue("email")
+	code, _ := strconv.Atoi(r.PostFormValue("code"))
+	password := r.PostFormValue("password")
+	_code := 5597
+	if code != _code {
+		view.RenderSimple(w, view.D{
+			"errorMessage":		"验证码错误",
+			"Email":		email,
+			"code" :		code,
+			"password":		password,
+		}, "auth.update")
+		return
+	}
+
+	_user, err := user.GetByEmail(email)
+
+	if err != nil {
+		// 账号不存在
+		view.RenderSimple(w, view.D{
+			"Error":		"邮箱不存在" + err.Error(),
+			"Email":		email,
+		}, "auth.update")
+	} else {
+		//_user.Password = password.Hash(_password)
+		err := _user.UpdatePassword(password)
+		if err != nil {
+			view.RenderSimple(w, view.D{
+				"Error":		"修改失败:" + err.Error(),
+				"Email":		email,
+			}, "auth.update")
+		}else {
+			// 修改成功跳转登录
+			http.Redirect(w, r, "/auth/login", http.StatusFound)
+		}
+	}
+
 }

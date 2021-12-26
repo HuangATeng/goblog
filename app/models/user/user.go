@@ -1,7 +1,6 @@
 package user
 
 import (
-	"fmt"
 	"goblog/app/models"
 	"goblog/pkg/logger"
 	"goblog/pkg/model"
@@ -25,7 +24,6 @@ type User struct {
 
 // Create 创建用户， 通过 User.ID 判断是否成功
 func (user *User) Create() (err error) {
-	fmt.Println(user)
 	if err = model.DB.Create(&user).Error; err != nil {
 		logger.LogError(err)
 		return err
@@ -59,4 +57,17 @@ func GetByEmail(email string) (User, error)  {
 func (user *User) ComparePassword(_password string) bool  {
 	//return user.Password == password
 	return password.CheckHash(_password, user.Password)
+}
+
+// UpdateUser 更新用户信息
+func (user *User) UpdatePassword(_password string) (err error)  {
+	// Updates,Update 更新操作会自动运行 model hooks 的 BeforeUpdate, AfterUpdate 方法，更新 updated_at 时间戳,
+	// 如果你不想调用这些方法，你可以使用 UpdateColumn， UpdateColumns
+	if err := model.DB.Model(&user).UpdateColumn("Password", password.Hash(_password)).Error; err != nil {
+		logger.LogError(err)
+		return err
+	}
+	return nil
+	//db.Model(&product).Updates(map[string]interface{}{"price": gorm.Expr("price * ? + ?", 2, 100)})
+
 }

@@ -1,6 +1,7 @@
 package user
 
 import (
+	"goblog/pkg/logger"
 	"goblog/pkg/password"
 	"gorm.io/gorm"
 )
@@ -28,6 +29,7 @@ func (user *User) BeforeUpdate(tx *gorm.DB) (err error)  {
  */
 // BeforeSave GORM 模型钩子，在保存和更新模型前调用
 func (user *User) BeforeSave(tx *gorm.DB) (err error){
+	logger.LogInfo(user)
 	if !password.IsHashed(user.Password) {
 		user.Password = password.Hash(user.Password)
 	}
