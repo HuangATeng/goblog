@@ -6,7 +6,9 @@ import (
 	"goblog/app/requests"
 	"goblog/pkg/auth"
 	"goblog/pkg/flash"
+	"goblog/pkg/logger"
 	"goblog/pkg/sedemail"
+	"goblog/pkg/session"
 	"goblog/pkg/view"
 	"math/rand"
 	"net/http"
@@ -124,6 +126,7 @@ func (*AuthController) Doretrieve(w http.ResponseWriter, r *http.Request)  {
 		rand.Seed(time.Now().Unix())
 		num := rand.Intn(10000)
 		text := fmt.Sprintf("您的验证码是：%d", num)
+		session.Put("code", num)
 		sedemail.SendEmail("ht19910000@163.com",_user.Email, "goblog 博客密码找回", "TFXQXEGWNOJVWOVE", text)
 		view.RenderSimple(w, view.D{"message":"验证码已发送至您邮箱","success":true}, "auth.retrieve")
 	}
@@ -138,7 +141,9 @@ func (*AuthController) Doupdate(w http.ResponseWriter, r *http.Request)  {
 	email := r.PostFormValue("email")
 	code, _ := strconv.Atoi(r.PostFormValue("code"))
 	password := r.PostFormValue("password")
-	_code := 5597
+	//_code := 5597
+	_code := session.Get("code")
+	logger.LogInfo(_code)
 	if code != _code {
 		view.RenderSimple(w, view.D{
 			"errorMessage":		"验证码错误",

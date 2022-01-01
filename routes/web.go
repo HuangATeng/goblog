@@ -25,28 +25,28 @@ func RegisterWebRoutes(r *mux.Router){
 	r.HandleFunc("/articles", ac.Index).Methods("GET").Name("articles.index")
 
 	// 创建文章
-	r.HandleFunc("/articles/create", ac.Create).Methods("GET").Name("articles.create")
-	r.HandleFunc("/articles", ac.Store).Methods("POST").Name("articles.store")
+	r.HandleFunc("/articles/create", middlewares.Auth(ac.Create)).Methods("GET").Name("articles.create")
+	r.HandleFunc("/articles", middlewares.Auth(ac.Store)).Methods("POST").Name("articles.store")
 
 	// 更新文章
-	r.HandleFunc("/articles/{id:[0-9]+}/edit", ac.Edit).Methods("GET").Name("articles.edit")
-	r.HandleFunc("/articles/{id:[0-9]+}", ac.Update).Methods("POST").Name("articles.update")
-	r.HandleFunc("/articles/{id:[0-9]+}/delete", ac.Delete).Methods("POST").Name("articles.delete")
+	r.HandleFunc("/articles/{id:[0-9]+}/edit", middlewares.Auth(ac.Edit)).Methods("GET").Name("articles.edit")
+	r.HandleFunc("/articles/{id:[0-9]+}", middlewares.Auth(ac.Update)).Methods("POST").Name("articles.update")
+	r.HandleFunc("/articles/{id:[0-9]+}/delete", middlewares.Auth(ac.Delete)).Methods("POST").Name("articles.delete")
 
 	// 用户注册路由
 	auc := new(controllers.AuthController)
-	r.HandleFunc("/auth/register", auc.Register).Methods("GET").Name("auth.register")
-	r.HandleFunc("/auth/do-register", auc.DoRegister).Methods("POST").Name("auth.doregister")
+	r.HandleFunc("/auth/register", middlewares.Guest(auc.Register)).Methods("GET").Name("auth.register")
+	r.HandleFunc("/auth/do-register", middlewares.Guest(auc.DoRegister)).Methods("POST").Name("auth.doregister")
 
 
 	// 用户登录认证路由
-	r.HandleFunc("/auth/login", auc.Login).Methods("GET").Name("auth.login")
-	r.HandleFunc("/auth/dologin", auc.DoLogin).Methods("POST").Name("auth.dologin")
-	r.HandleFunc("/auth/logout", auc.Logout).Methods("POST").Name("auth.logout")
-	r.HandleFunc("/auth/retrieve", auc.Retrieve).Methods("GET").Name("auth.retrieve")
-	r.HandleFunc("/auth/doretrieve", auc.Doretrieve).Methods("POST").Name("auth.doretrieve")
-	r.HandleFunc("/auth/update", auc.Update).Methods("GET").Name("auth.update")
-	r.HandleFunc("/auth/doupdate", auc.Doupdate).Methods("POST").Name("auth.doupdate")
+	r.HandleFunc("/auth/login", middlewares.Guest(auc.Login)).Methods("GET").Name("auth.login")
+	r.HandleFunc("/auth/dologin", middlewares.Guest(auc.DoLogin)).Methods("POST").Name("auth.dologin")
+	r.HandleFunc("/auth/logout", middlewares.Guest(auc.Logout)).Methods("POST").Name("auth.logout")
+	r.HandleFunc("/auth/retrieve", middlewares.Guest(auc.Retrieve)).Methods("GET").Name("auth.retrieve")
+	r.HandleFunc("/auth/doretrieve", middlewares.Guest(auc.Doretrieve)).Methods("POST").Name("auth.doretrieve")
+	r.HandleFunc("/auth/update", middlewares.Guest(auc.Update)).Methods("GET").Name("auth.update")
+	r.HandleFunc("/auth/doupdate", middlewares.Guest(auc.Doupdate)).Methods("POST").Name("auth.doupdate")
 
 
 	// 静态资源

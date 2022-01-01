@@ -71,3 +71,8 @@ func (user *User) UpdatePassword(_password string) (err error)  {
 	//db.Model(&product).Updates(map[string]interface{}{"price": gorm.Expr("price * ? + ?", 2, 100)})
 
 }
+
+// Link 生成用户连接
+func (user *User) Link() string {
+	return ""
+}

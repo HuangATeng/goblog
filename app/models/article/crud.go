@@ -12,7 +12,7 @@ func Get(idstr string) (Article, error) {
 	var article Article
 	id := types.StringToUnit64(idstr)
 
-	if err := model.DB.First(&article, id).Error; err != nil {
+	if err := model.DB.Preload("User").First(&article, id).Error; err != nil {
 		return article, err
 	}
 
@@ -22,7 +22,7 @@ func Get(idstr string) (Article, error) {
 // 获取全部文章
 func GetAll() ([]Article, error)  {
 	var articles []Article
-	if err := model.DB.Find(&articles).Error; err != nil {
+	if err := model.DB.Preload("User").Find(&articles).Error; err != nil {
 		return articles, err
 	}
 	return articles, nil
