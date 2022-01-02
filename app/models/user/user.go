@@ -5,6 +5,7 @@ import (
 	"goblog/pkg/logger"
 	"goblog/pkg/model"
 	"goblog/pkg/password"
+	"goblog/pkg/route"
 	"goblog/pkg/types"
 )
 
@@ -73,6 +74,6 @@ func (user *User) UpdatePassword(_password string) (err error)  {
 }
 
 // Link 生成用户连接
-func (user *User) Link() string {
-	return ""
+func (user User) Link() string {
+	return route.Name2Url("users.show", "id", user.GetStringID())
 }

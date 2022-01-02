@@ -48,6 +48,9 @@ func RegisterWebRoutes(r *mux.Router){
 	r.HandleFunc("/auth/update", middlewares.Guest(auc.Update)).Methods("GET").Name("auth.update")
 	r.HandleFunc("/auth/doupdate", middlewares.Guest(auc.Doupdate)).Methods("POST").Name("auth.doupdate")
 
+	// 用户相关
+	uc := new(controllers.UserController)
+	r.HandleFunc("/users/{id:[0-9]+}", uc.Show).Methods("GET").Name("users.show")
 
 	// 静态资源
 	r.PathPrefix("/css/").Handler(http.FileServer(http.Dir("./public")))
