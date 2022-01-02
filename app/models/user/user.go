@@ -44,6 +44,15 @@ func Get(idstr string) (User, error)  {
 	return user, nil
 }
 
+// 用户列表
+func All() ([]User, error)  {
+	var users []User
+	if err := model.DB.Find(&users).Error; err != nil {
+		return users, err
+	}
+	return users, nil
+}
+
 // GetByEmail 通过 Email 来获取用户
 func GetByEmail(email string) (User, error)  {
 	var user User
