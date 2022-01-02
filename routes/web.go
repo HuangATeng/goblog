@@ -42,7 +42,7 @@ func RegisterWebRoutes(r *mux.Router){
 	// 用户登录认证路由
 	r.HandleFunc("/auth/login", middlewares.Guest(auc.Login)).Methods("GET").Name("auth.login")
 	r.HandleFunc("/auth/dologin", middlewares.Guest(auc.DoLogin)).Methods("POST").Name("auth.dologin")
-	r.HandleFunc("/auth/logout", middlewares.Guest(auc.Logout)).Methods("POST").Name("auth.logout")
+	r.HandleFunc("/auth/logout", auc.Logout).Methods("POST").Name("auth.logout")
 	r.HandleFunc("/auth/retrieve", middlewares.Guest(auc.Retrieve)).Methods("GET").Name("auth.retrieve")
 	r.HandleFunc("/auth/doretrieve", middlewares.Guest(auc.Doretrieve)).Methods("POST").Name("auth.doretrieve")
 	r.HandleFunc("/auth/update", middlewares.Guest(auc.Update)).Methods("GET").Name("auth.update")

@@ -12,7 +12,6 @@ func ValidateArticleForm(data article.Article) map[string][]string {
 		"title": []string{"required", "min:3", "max:40"},
 		"body": []string{"required", "min:10"},
 	}
-
 	// 错误消息
 	messages := govalidator.MapData{
 		"title": []string{
