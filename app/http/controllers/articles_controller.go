@@ -6,6 +6,7 @@ import (
 	"goblog/app/models/article"
 	"goblog/app/policies"
 	"goblog/app/requests"
+	"goblog/pkg/auth"
 	"goblog/pkg/flash"
 	"goblog/pkg/logger"
 	"goblog/pkg/route"
@@ -66,9 +67,11 @@ func (*ArticlesController) Create(w http.ResponseWriter, r *http.Request)  {
 // 保存文章
 func (*ArticlesController) Store(w http.ResponseWriter, r *http.Request)  {
 	// 初始化数据
+	currentUser := auth.User()
 	_article := article.Article{
 		Title:	r.PostFormValue("title"),
 		Body:	r.PostFormValue("body"),
+		UserID: currentUser.ID,
 	}
 
 	// 表的验证
@@ -78,9 +81,9 @@ func (*ArticlesController) Store(w http.ResponseWriter, r *http.Request)  {
 	if len(errors) == 0 {
 
 		_article.Create()
-		logger.LogInfo(_article)
 		if _article.ID > 0 {
-			indexUrl := route.Name2Url("article.show", "id", _article.GetStringID())
+			fmt.Println(_article.GetStringID())
+			indexUrl := route.Name2Url("articles.show", "id", _article.GetStringID())
 			http.Redirect(w, r, indexUrl, http.StatusFound)
 		}else {
 			w.WriteHeader(http.StatusInternalServerError)
