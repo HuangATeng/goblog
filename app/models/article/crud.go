@@ -3,7 +3,10 @@ package article
 import (
 	"goblog/pkg/logger"
 	"goblog/pkg/model"
+	"goblog/pkg/pagination"
+	"goblog/pkg/route"
 	"goblog/pkg/types"
+	"net/http"
 )
 
 // Get 通过 ID 获取文章
@@ -20,7 +23,7 @@ func Get(idstr string) (Article, error) {
 }
 
 // GetByUserID 获取用户全部文章
-func GetByUserID(uid string) ([]Article, error)  {
+func GetByUserID(uid string) ([]Article ,error)  {
 	var articles []Article
 	if err := model.DB.Where("user_id = ?", uid).Preload("User").Find(&articles).Error; err != nil {
 		return articles, err
@@ -29,12 +32,23 @@ func GetByUserID(uid string) ([]Article, error)  {
 }
 
 // 获取全部文章
-func GetAll() ([]Article, error)  {
+func GetAll(r *http.Request, perPage int) ([]Article, pagination.ViewData ,error)  {
+
+
+	// 初始化分页实例
+	db := model.DB.Model(Article{}).Order("created_at desc")
+	_pager := pagination.New(r, db, route.Name2Url("articles.index"), perPage)
+
+	// 获取视图数据
+	viewData := _pager.Paging()
+
+	// 获取数据
 	var articles []Article
-	if err := model.DB.Preload("User").Find(&articles).Error; err != nil {
-		return articles, err
-	}
-	return articles, nil
+	_pager.Results(&articles)
+	//if err := model.DB.Preload("User").Find(&articles).Error; err != nil {
+	//	return articles, err
+	//}
+	return articles, viewData, nil
 }
 
 

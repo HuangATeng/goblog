@@ -28,7 +28,7 @@ type ArticlesController struct {
 func (ac *ArticlesController) Index(w http.ResponseWriter, r *http.Request)  {
 	//fmt.Fprint(w, config.Get("app.name"))
 	// 获取结果集
-	articles, err := article.GetAll()
+	articles,pagerData, err := article.GetAll(r, 10)
 
 	if err != nil {
 		// 数据库错误
@@ -36,6 +36,7 @@ func (ac *ArticlesController) Index(w http.ResponseWriter, r *http.Request)  {
 	} else {
 		view.Render(w,  view.D{
 			"Articles": articles,
+			"PagerData": pagerData,
 		}, "articles.index", "articles._article_meta")
 	}
 }
