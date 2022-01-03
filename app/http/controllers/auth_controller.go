@@ -127,7 +127,7 @@ func (*AuthController) Doretrieve(w http.ResponseWriter, r *http.Request)  {
 		num := rand.Intn(10000)
 		text := fmt.Sprintf("您的验证码是：%d", num)
 		session.Put("code", num)
-		sedemail.SendEmail("ht19910000@163.com",_user.Email, "goblog 博客密码找回", "TFXQXEGWNOJVWOVE", text)
+		sedemail.SendEmail("ht19910000@163.com",_user.Email, "goblog 博客密码找回", "", text)
 		view.RenderSimple(w, view.D{"message":"验证码已发送至您邮箱","success":true}, "auth.retrieve")
 	}
 }
