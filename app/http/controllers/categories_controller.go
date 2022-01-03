@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"fmt"
+	"goblog/app/models/article"
 	"goblog/app/models/category"
 	"goblog/app/requests"
 	"goblog/pkg/flash"
@@ -15,8 +16,25 @@ type CategoriesController struct {
 }
 
 // Show 显示文章分类
-func (*CategoriesController) Show(w http.ResponseWriter, r *http.Request)  {
+func (cc *CategoriesController) Show(w http.ResponseWriter, r *http.Request)  {
+	// 获取URL 参数
+	id := route.GetRouteVariable("id", r)
 
+	// 读取数据
+	_category, err := category.Get(id)
+
+	// 获取结果
+	articles, pagerData, err := article.GetByCategoryID(_category.GetStringID(), r, 10)
+
+	if err != nil {
+		cc.ResponseForSQLError(w, err)
+	} else {
+		// 加载模板
+		view.Render(w, view.D{
+			"Articles": articles,
+			"PagerData": pagerData,
+		}, "articles.index", "articles._article_meta")
+	}
 }
 
 // Create 文章分类创建页面

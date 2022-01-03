@@ -31,6 +31,22 @@ func GetByUserID(uid string) ([]Article ,error)  {
 	return articles, nil
 }
 
+// GetByCategoryID 获取分类文章
+func GetByCategoryID(cid string, r *http.Request, perPage int) ([]Article, pagination.ViewData, error) {
+	// 初始化分页实例
+	db := model.DB.Model(Article{}).Where("category_id = ?", cid).Order("created_at desc")
+	_pager := pagination.New(r, db, route.Name2Url("categories.show", "id", cid), perPage)
+
+	// 获取视图
+	viewData := _pager.Paging()
+
+	// 获取数据
+	var articles []Article
+	_pager.Results(&articles)
+
+	return articles, viewData, nil
+}
+
 // 获取全部文章
 func GetAll(r *http.Request, perPage int) ([]Article, pagination.ViewData ,error)  {
 
