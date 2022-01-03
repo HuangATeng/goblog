@@ -14,6 +14,11 @@ type CategoriesController struct {
 	BaseController
 }
 
+// Show 显示文章分类
+func (*CategoriesController) Show(w http.ResponseWriter, r *http.Request)  {
+
+}
+
 // Create 文章分类创建页面
 func (*CategoriesController) Create(w http.ResponseWriter, r *http.Request) {
 	view.Render(w, view.D{}, "categories.create")
